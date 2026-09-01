@@ -26,7 +26,7 @@ frontend to simplify the whole stack. Routes are deliberately thin — each one 
 method and path to a controller function — with all query logic, validation, and response
 shaping living in the controllers, and a small `routes/controllers/middleware` structure
 that scales cleanly as endpoints were added (auth, bookings, mechanics, customers, vehicles,
-services, admin).
+services, seeding).
 
 ## Database: PostgreSQL over MongoDB
 
@@ -151,7 +151,7 @@ database, so there's one consistent source of data throughout development and in
 
 ## Seeding realistic data
 
-Sample data is generated through a guarded API route (`POST /api/admin/seed`, protected by a
+Sample data is generated through a guarded API route (`POST /api/seed`, protected by a
 shared-secret header) rather than a one-off script, using `@faker-js/faker` for names, emails,
 and phone numbers, with weighted distributions for booking and mechanic status so the seeded
 dashboard reflects a real, uneven operation rather than uniform random noise. It produces 550+
@@ -160,3 +160,8 @@ categories — comfortably above the assignment's stated minimums — inserted v
 multi-row statements for efficiency. A separate, additive seeding step
 (`npm run seed:users`) creates one demo login account per role, linked to real seeded
 customer and mechanic records.
+
+A companion route, `POST /api/delete`, wipes every table — including login accounts — using
+the same shared-secret guard as `/seed`. It's a full reset rather than a re-seed: nothing is
+repopulated afterward, so it's meant for deliberately starting from a completely empty
+database, not for everyday use.

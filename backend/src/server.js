@@ -4,7 +4,7 @@ import swaggerUi from 'swagger-ui-express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import 'dotenv/config'
-import adminRoutes from './routes/adminRoutes.js'
+import seedRoutes from './routes/seedRoutes.js'
 import authRoutes from './routes/authRoutes.js'
 import dashboardRoutes from './routes/dashboardRoutes.js'
 import bookingRoutes from './routes/bookingRoutes.js'
@@ -29,7 +29,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' })
 })
 
-app.use('/api/admin', adminRoutes)
+app.use('/api', seedRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/bookings', bookingRoutes)

@@ -153,3 +153,26 @@ export async function seedDatabase(req, res) {
     client.release()
   }
 }
+
+// Wipes every table, including login accounts (users). Unlike seedDatabase, this
+// does not repopulate anything afterward — the database is left empty.
+export async function deleteAllData(req, res) {
+  const client = await pool.connect()
+
+  try {
+    const counts = {}
+    for (const table of ['users', 'bookings', 'vehicles', 'customers', 'mechanics', 'services']) {
+      const result = await client.query(`SELECT COUNT(*) FROM ${table}`)
+      counts[table] = Number(result.rows[0].count)
+    }
+
+    await client.query('TRUNCATE users, bookings, vehicles, customers, mechanics, services RESTART IDENTITY CASCADE')
+
+    res.json({ message: 'All data deleted', counts })
+  } catch (error) {
+    console.error('Delete failed:', error)
+    res.status(500).json({ error: 'Delete failed', detail: error.message })
+  } finally {
+    client.release()
+  }
+}

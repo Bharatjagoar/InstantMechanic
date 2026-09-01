@@ -1,4 +1,4 @@
-// Guards destructive/admin-only routes (like re-seeding) from being publicly callable
+// Guards the destructive re-seed route from being publicly callable
 // once the backend is deployed. Not full auth — just enough to stop anyone with the URL
 // from wiping the database.
 export function requireSeedKey(req, res, next) {

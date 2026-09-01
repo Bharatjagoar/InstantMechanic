@@ -113,7 +113,7 @@ psql "$DATABASE_URL" -f db/schema.sql
 
 # Seed realistic sample data (550+ bookings, 60+ customers, 20+ mechanics, 10 services)
 npm run dev             # start the server, then:
-curl -X POST http://localhost:4000/api/admin/seed -H "x-seed-key: <your SEED_SECRET>"
+curl -X POST http://localhost:4000/api/seed -H "x-seed-key: <your SEED_SECRET>"
 
 # Seed the demo login accounts (one per role)
 npm run seed:users
@@ -173,7 +173,8 @@ Major endpoints:
 | GET    | `/api/customers`                  | Ops              | Customer list with derived stats                    |
 | GET    | `/api/vehicles/mine`               | Customer         | The logged-in customer's own vehicles               |
 | GET    | `/api/services`                    | Any logged-in    | Service catalog                                     |
-| POST   | `/api/admin/seed`                   | Guarded by key   | Seed the database with sample data                  |
+| POST   | `/api/seed`                          | Guarded by key   | Seed the database with sample data                  |
+| POST   | `/api/delete`                        | Guarded by key   | Delete all data from every table (irreversible)     |
 
 Live updates are pushed over Socket.io as `booking:created` and `booking:updated` events.
 

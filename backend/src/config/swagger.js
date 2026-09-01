@@ -18,7 +18,7 @@ const options = {
       { name: 'Customers', description: 'Customer records (ops only)' },
       { name: 'Vehicles', description: "The logged-in customer's own vehicles" },
       { name: 'Services', description: 'Service catalog' },
-      { name: 'Admin', description: 'Database seeding (guarded)' },
+      { name: 'Seeding', description: 'Seeding and wiping the database (both guarded)' },
     ],
     components: {
       securitySchemes: {
