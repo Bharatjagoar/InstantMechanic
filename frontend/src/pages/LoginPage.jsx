@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Car, Loader2 } from 'lucide-react'
+import { Car, Loader2, Eye, EyeOff } from 'lucide-react'
 import { login as loginRequest } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
 import { ROLE_HOME } from '../lib/roles'
@@ -14,6 +14,7 @@ const DEMO_ACCOUNTS = [
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const { login } = useAuth()
@@ -75,14 +76,29 @@ export default function LoginPage() {
             <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
               Password
             </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="rounded-lg border px-3 py-2 text-sm outline-none"
-              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--page-plane)', color: 'var(--text-primary)' }}
-            />
+            <div
+              className="flex items-center rounded-lg border px-3"
+              style={{ borderColor: 'var(--border)', backgroundColor: 'var(--page-plane)' }}
+            >
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-transparent py-2 text-sm outline-none"
+                style={{ color: 'var(--text-primary)' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="shrink-0 p-1"
+                style={{ color: 'var(--text-muted)' }}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
           {error && (
