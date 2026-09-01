@@ -1,8 +1,14 @@
+import dns from 'node:dns'
 import express from 'express'
 import cors from 'cors'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import 'dotenv/config'
+
+// This machine's ISP-provided DNS resolver intermittently returns only AAAA (IPv6) or
+// only A (IPv4) records for the Neon hostname, causing sporadic ENOTFOUND errors.
+// Point Node's own DNS lookups at reliable public resolvers instead.
+dns.setServers(['1.1.1.1', '8.8.8.8'])
 import adminRoutes from './routes/adminRoutes.js'
 import dashboardRoutes from './routes/dashboardRoutes.js'
 import bookingRoutes from './routes/bookingRoutes.js'
