@@ -8,8 +8,15 @@ import { BreakdownBarChart } from '../components/charts/BreakdownBarChart'
 import { LoadingState, ErrorState } from '../components/StateViews'
 import { BOOKING_STATUS_HEX, BOOKING_STATUS_META, formatCurrency } from '../lib/status'
 import { colorForCategory } from '../lib/categories'
+import { useTheme } from '../context/ThemeContext'
+
+const SERIES_COLORS = {
+  light: { bookings: '#2a78d6', revenue: '#eb6834' },
+  dark: { bookings: '#3987e5', revenue: '#d95926' },
+}
 
 export default function DashboardPage() {
+  const { theme } = useTheme()
   const { data, loading, error, reload } = useApi(getDashboard, [])
 
   if (loading) return <LoadingState label="Loading dashboard..." />
@@ -47,10 +54,15 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title="Bookings Over Time (30 days)">
-          <TrendChart data={charts.bookingsOverTime} dataKey="count" color="#2a78d6" />
+          <TrendChart data={charts.bookingsOverTime} dataKey="count" color={SERIES_COLORS[theme].bookings} />
         </ChartCard>
         <ChartCard title="Revenue Over Time (30 days)">
-          <TrendChart data={charts.revenueOverTime} dataKey="revenue" color="#eb6834" valueFormatter={formatCurrency} />
+          <TrendChart
+            data={charts.revenueOverTime}
+            dataKey="revenue"
+            color={SERIES_COLORS[theme].revenue}
+            valueFormatter={formatCurrency}
+          />
         </ChartCard>
         <ChartCard title="Booking Status">
           <BreakdownBarChart
@@ -59,7 +71,7 @@ export default function DashboardPage() {
             valueKey="count"
             colorFor={(label) => {
               const entry = statusData.find((s) => s.status === label)
-              return BOOKING_STATUS_HEX[entry?.key] || '#898781'
+              return BOOKING_STATUS_HEX[theme][entry?.key] || '#898781'
             }}
           />
         </ChartCard>
@@ -68,7 +80,7 @@ export default function DashboardPage() {
             data={charts.categoryBreakdown}
             nameKey="category"
             valueKey="count"
-            colorFor={colorForCategory}
+            colorFor={(category) => colorForCategory(category, theme)}
           />
         </ChartCard>
       </div>

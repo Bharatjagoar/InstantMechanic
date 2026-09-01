@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, CalendarClock, Wrench, Users, Car } from 'lucide-react'
+import { ThemeToggle } from '../ThemeToggle'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -48,6 +49,10 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <div className="mt-auto px-3 pb-5">
+        <ThemeToggle />
+      </div>
     </aside>
   )
 }

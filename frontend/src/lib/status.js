@@ -7,13 +7,22 @@ export const BOOKING_STATUS_META = {
 }
 
 // Plain hex mirror of the CSS custom properties above — SVG fills (recharts) need a
-// literal color value, not a var() reference.
+// literal color value, not a var() reference, so light/dark steps are duplicated here.
 export const BOOKING_STATUS_HEX = {
-  pending: '#eda100',
-  assigned: '#2a78d6',
-  on_the_way: '#4a3aa7',
-  completed: '#008300',
-  cancelled: '#e34948',
+  light: {
+    pending: '#eda100',
+    assigned: '#2a78d6',
+    on_the_way: '#4a3aa7',
+    completed: '#008300',
+    cancelled: '#e34948',
+  },
+  dark: {
+    pending: '#c98500',
+    assigned: '#3987e5',
+    on_the_way: '#9085e9',
+    completed: '#008300',
+    cancelled: '#e66767',
+  },
 }
 
 export const MECHANIC_STATUS_META = {
