@@ -14,6 +14,7 @@ import { swaggerSpec } from './config/swagger.js'
 
 const app = express()
 const PORT = process.env.PORT || 4000
+const HOST = process.env.HOST || '0.0.0.0'
 
 app.use(cors())
 app.use(express.json())
@@ -41,7 +42,7 @@ io.on('connection', (socket) => {
 
 setIO(io)
 
-httpServer.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`)
+httpServer.listen(PORT, HOST, () => {
+  console.log(`Backend running on ${HOST}:${PORT}`)
   console.log(`API docs available at http://localhost:${PORT}/api-docs`)
 })
