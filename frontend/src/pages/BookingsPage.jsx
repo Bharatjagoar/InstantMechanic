@@ -3,8 +3,10 @@ import { Search, ArrowUpDown, Loader2 } from 'lucide-react'
 import { useApi } from '../hooks/useApi'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { useSocketEvent } from '../hooks/useSocketEvent'
-import { getBookings, updateBookingStatus } from '../api/bookings'
+import { getBookings, updateBookingStatus, assignMechanic } from '../api/bookings'
+import { getMechanics } from '../api/mechanics'
 import { Pagination } from '../components/Pagination'
+import { AssignMechanicMenu } from '../components/AssignMechanicMenu'
 import { LoadingState, ErrorState, EmptyState } from '../components/StateViews'
 import { BOOKING_STATUS_META, formatCurrency, formatDate } from '../lib/status'
 
@@ -28,6 +30,7 @@ export default function BookingsPage() {
   const [sortBy, setSortBy] = useState('scheduled_at')
   const [sortOrder, setSortOrder] = useState('desc')
   const [updatingIds, setUpdatingIds] = useState(() => new Set())
+  const [assigningId, setAssigningId] = useState(null)
 
   const debouncedSearch = useDebouncedValue(search)
 
@@ -35,6 +38,8 @@ export default function BookingsPage() {
     () => getBookings({ search: debouncedSearch, status, page, limit: 15, sortBy, sortOrder }),
     [debouncedSearch, status, page, sortBy, sortOrder]
   )
+
+  const { data: mechanics } = useApi(getMechanics, [])
 
   // Patches a matching row in place when ANY client changes a booking's status —
   // satisfies "reflect the change without a full page reload."
@@ -68,6 +73,23 @@ export default function BookingsPage() {
       handleBookingUpdated(updated)
     } catch (err) {
       console.error('Failed to update booking status:', err.message)
+    } finally {
+      setUpdatingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(bookingId)
+        return next
+      })
+    }
+  }
+
+  async function handleAssign(bookingId, mechanicId) {
+    setAssigningId(null)
+    setUpdatingIds((prev) => new Set(prev).add(bookingId))
+    try {
+      const updated = await assignMechanic(bookingId, mechanicId)
+      handleBookingUpdated(updated)
+    } catch (err) {
+      console.error('Failed to assign mechanic:', err.message)
     } finally {
       setUpdatingIds((prev) => {
         const next = new Set(prev)
@@ -177,8 +199,31 @@ export default function BookingsPage() {
                         <td className="px-4 py-3" style={{ color: 'var(--text-secondary)' }}>
                           {booking.service.name}
                         </td>
-                        <td className="px-4 py-3" style={{ color: 'var(--text-secondary)' }}>
-                          {booking.mechanic ? booking.mechanic.name : '—'}
+                        <td className="relative px-4 py-3" style={{ color: 'var(--text-secondary)' }}>
+                          {booking.mechanic ? (
+                            booking.mechanic.name
+                          ) : booking.status === 'pending' ? (
+                            <>
+                              <button
+                                type="button"
+                                disabled={isUpdating}
+                                onClick={() => setAssigningId(assigningId === booking.id ? null : booking.id)}
+                                className="rounded-lg border px-2.5 py-1 text-xs font-medium disabled:opacity-60"
+                                style={{ borderColor: 'var(--border)', color: 'var(--series-bookings)' }}
+                              >
+                                Assign
+                              </button>
+                              {assigningId === booking.id && mechanics && (
+                                <AssignMechanicMenu
+                                  mechanics={mechanics.data}
+                                  onSelect={(mechanicId) => handleAssign(booking.id, mechanicId)}
+                                  onClose={() => setAssigningId(null)}
+                                />
+                              )}
+                            </>
+                          ) : (
+                            '—'
+                          )}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
@@ -192,7 +237,7 @@ export default function BookingsPage() {
                                 color: meta.color,
                               }}
                             >
-                              {STATUS_OPTIONS.map((s) => (
+                              {STATUS_OPTIONS.filter((s) => !(booking.status === 'pending' && s === 'assigned')).map((s) => (
                                 <option key={s} value={s}>
                                   {BOOKING_STATUS_META[s].label}
                                 </option>
