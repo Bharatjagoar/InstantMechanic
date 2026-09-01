@@ -21,22 +21,35 @@ export function ToastStack() {
   const [toasts, setToasts] = useState([])
   const { user } = useAuth()
 
+  const pushToast = useCallback((message) => {
+    const id = ++idCounter
+    setToasts((prev) => [...prev, { id, message }])
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id))
+    }, 4000)
+  }, [])
+
   const handleBookingUpdated = useCallback(
     (booking) => {
       if (!isRelevantToUser(booking, user)) return
-
-      const id = ++idCounter
       const label = BOOKING_STATUS_META[booking.status]?.label || booking.status
-      setToasts((prev) => [...prev, { id, message: `Booking #${booking.id} → ${label}` }])
-
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== id))
-      }, 4000)
+      pushToast(`Booking #${booking.id} → ${label}`)
     },
-    [user]
+    [user, pushToast]
+  )
+
+  // New-booking notifications go to ops only — the mechanic auto-assigned to it
+  // (if any) finds out by seeing the job appear in "My Jobs", not via a popup.
+  const handleBookingCreated = useCallback(
+    (booking) => {
+      if (user?.role !== 'ops') return
+      pushToast(`New booking #${booking.id} from ${booking.customer.name}`)
+    },
+    [user, pushToast]
   )
 
   useSocketEvent('booking:updated', handleBookingUpdated)
+  useSocketEvent('booking:created', handleBookingCreated)
 
   if (toasts.length === 0) return null
 

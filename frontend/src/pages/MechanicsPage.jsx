@@ -9,8 +9,10 @@ export default function MechanicsPage() {
   const { data, loading, error, reload } = useApi(getMechanics, [])
 
   // Jobs-completed / last-booking are derived from bookings — refetch on any status
-  // change so they never drift from the source of truth.
+  // change so they never drift from the source of truth. A new booking can also
+  // auto-assign a mechanic (flipping them to busy), so refetch on creation too.
   useSocketEvent('booking:updated', reload)
+  useSocketEvent('booking:created', reload)
 
   if (loading) return <LoadingState label="Loading mechanics..." />
   if (error) return <ErrorState message={error} onRetry={reload} />

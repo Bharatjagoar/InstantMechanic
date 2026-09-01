@@ -23,6 +23,7 @@ export default function DashboardPage() {
   // Overview/chart numbers are derived aggregates — refetch rather than recompute
   // them client-side, so they never drift from the source of truth.
   useSocketEvent('booking:updated', reload)
+  useSocketEvent('booking:created', reload)
 
   if (loading) return <LoadingState label="Loading dashboard..." />
   if (error) return <ErrorState message={error} onRetry={reload} />

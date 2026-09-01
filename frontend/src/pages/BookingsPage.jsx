@@ -55,6 +55,9 @@ export default function BookingsPage() {
     [setData]
   )
   useSocketEvent('booking:updated', handleBookingUpdated)
+  // A new booking is a fresh row, not a patch to an existing one — refetch the
+  // current page/filters rather than trying to merge it in place.
+  useSocketEvent('booking:created', reload)
 
   function toggleSort(column) {
     if (sortBy === column) {
