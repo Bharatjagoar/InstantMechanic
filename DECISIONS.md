@@ -93,9 +93,11 @@ one shared screen.
 
 **Authentication** uses JWTs passed as a bearer token, checked on every protected route by a
 small `requireAuth` middleware, with a `requireRole` middleware layering role checks on top.
-Login uses a small set of seeded demo accounts, one per role, shown directly on the login
-screen — this keeps the reviewer experience completely frictionless while still exercising a
-real login flow, real token issuance, and real server-side authorization.
+Customers can register themselves — creating their account, their first vehicle, and logging
+them in all in one step — while ops and mechanic accounts are provisioned directly, matching
+how those roles actually come to exist in a real operation. A set of seeded demo accounts, one
+per role, is also shown directly on the login screen, so a reviewer can explore every role
+immediately without first registering one.
 
 **Access control lives on the server, not just the UI.** A customer's or mechanic's requests
 are always narrowed to their own data by the API itself — for example, `GET /api/bookings`

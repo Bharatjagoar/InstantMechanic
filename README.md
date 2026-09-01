@@ -160,6 +160,7 @@ Major endpoints:
 
 | Method | Path                          | Who              | Description                                      |
 |--------|-------------------------------|------------------|---------------------------------------------------|
+| POST   | `/api/auth/register`          | Public           | Create a customer account + first vehicle, returns a JWT |
 | POST   | `/api/auth/login`             | Public           | Log in, returns a JWT                              |
 | GET    | `/api/auth/me`                | Any logged-in    | Current user                                       |
 | GET    | `/api/dashboard`               | Ops              | Overview stats + chart data                        |
