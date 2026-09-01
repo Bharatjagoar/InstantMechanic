@@ -174,7 +174,7 @@ Major endpoints:
 | GET    | `/api/vehicles/mine`               | Customer         | The logged-in customer's own vehicles               |
 | GET    | `/api/services`                    | Any logged-in    | Service catalog                                     |
 | POST   | `/api/seed`                          | Guarded by key   | Seed the database with sample data                  |
-| POST   | `/api/delete`                        | Guarded by key   | Delete all data from every table (irreversible)     |
+| DELETE | `/api/delete`                        | Guarded by key   | Delete all data from every table (irreversible)     |
 
 Live updates are pushed over Socket.io as `booking:created` and `booking:updated` events.
 

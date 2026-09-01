@@ -161,7 +161,7 @@ multi-row statements for efficiency. A separate, additive seeding step
 (`npm run seed:users`) creates one demo login account per role, linked to real seeded
 customer and mechanic records.
 
-A companion route, `POST /api/delete`, wipes every table — including login accounts — using
+A companion route, `DELETE /api/delete`, wipes every table — including login accounts — using
 the same shared-secret guard as `/seed`. It's a full reset rather than a re-seed: nothing is
 repopulated afterward, so it's meant for deliberately starting from a completely empty
 database, not for everyday use.

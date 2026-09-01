@@ -27,7 +27,7 @@ router.post('/seed', requireSeedKey, seedDatabase)
 /**
  * @openapi
  * /delete:
- *   post:
+ *   delete:
  *     tags: [Seeding]
  *     summary: Delete all data from every table, including login accounts
  *     description: >
@@ -44,6 +44,6 @@ router.post('/seed', requireSeedKey, seedDatabase)
  *       401:
  *         description: Missing or incorrect x-seed-key header
  */
-router.post('/delete', requireSeedKey, deleteAllData)
+router.delete('/delete', requireSeedKey, deleteAllData)
 
 export default router
