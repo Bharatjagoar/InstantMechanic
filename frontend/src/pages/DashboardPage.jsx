@@ -1,5 +1,6 @@
 import { CalendarDays, CheckCircle2, Clock, XCircle, IndianRupee, Wrench, UserPlus, ListChecks } from 'lucide-react'
 import { useApi } from '../hooks/useApi'
+import { useSocketEvent } from '../hooks/useSocketEvent'
 import { getDashboard } from '../api/dashboard'
 import { StatCard } from '../components/StatCard'
 import { ChartCard } from '../components/charts/ChartCard'
@@ -18,6 +19,10 @@ const SERIES_COLORS = {
 export default function DashboardPage() {
   const { theme } = useTheme()
   const { data, loading, error, reload } = useApi(getDashboard, [])
+
+  // Overview/chart numbers are derived aggregates — refetch rather than recompute
+  // them client-side, so they never drift from the source of truth.
+  useSocketEvent('booking:updated', reload)
 
   if (loading) return <LoadingState label="Loading dashboard..." />
   if (error) return <ErrorState message={error} onRetry={reload} />

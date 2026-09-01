@@ -1,4 +1,5 @@
 import { useApi } from '../hooks/useApi'
+import { useSocketEvent } from '../hooks/useSocketEvent'
 import { getMechanics } from '../api/mechanics'
 import { StatusBadge } from '../components/StatusBadge'
 import { LoadingState, ErrorState, EmptyState } from '../components/StateViews'
@@ -6,6 +7,10 @@ import { MECHANIC_STATUS_META, BOOKING_STATUS_META, formatDate } from '../lib/st
 
 export default function MechanicsPage() {
   const { data, loading, error, reload } = useApi(getMechanics, [])
+
+  // Jobs-completed / last-booking are derived from bookings — refetch on any status
+  // change so they never drift from the source of truth.
+  useSocketEvent('booking:updated', reload)
 
   if (loading) return <LoadingState label="Loading mechanics..." />
   if (error) return <ErrorState message={error} onRetry={reload} />

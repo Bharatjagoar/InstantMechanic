@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Menu, Car } from 'lucide-react'
 import { Sidebar } from './Sidebar'
+import { ToastStack } from '../ToastStack'
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'var(--page-plane)' }}>
+      <ToastStack />
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex min-w-0 flex-1 flex-col">

@@ -17,3 +17,18 @@ export async function apiGet(path, params = {}) {
 
   return response.json()
 }
+
+export async function apiPatch(path, body) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const errBody = await response.json().catch(() => ({}))
+    throw new Error(errBody.error || `Request failed with status ${response.status}`)
+  }
+
+  return response.json()
+}

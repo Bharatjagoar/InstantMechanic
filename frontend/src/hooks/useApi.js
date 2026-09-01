@@ -19,5 +19,5 @@ export function useApi(fetcher, deps = []) {
     load()
   }, [load])
 
-  return { data, error, loading, reload: load }
+  return { data, error, loading, reload: load, setData }
 }

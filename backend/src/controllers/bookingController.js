@@ -1,4 +1,6 @@
 import { pool } from '../db/pool.js'
+import { getIO } from '../realtime/io.js'
+import { BOOKING_STATUSES } from '../data/seedSource.js'
 
 // Whitelisted so the sort column can never come directly from user input (SQL injection guard).
 const SORT_COLUMNS = {
@@ -126,5 +128,34 @@ export async function getBookingById(req, res) {
   } catch (error) {
     console.error('Failed to get booking:', error)
     res.status(500).json({ error: 'Failed to get booking' })
+  }
+}
+
+export async function updateBookingStatus(req, res) {
+  try {
+    const { status } = req.body
+
+    if (!BOOKING_STATUSES.includes(status)) {
+      return res.status(400).json({ error: `Status must be one of: ${BOOKING_STATUSES.join(', ')}` })
+    }
+
+    const updateResult = await pool.query('UPDATE bookings SET status = $1 WHERE id = $2 RETURNING id', [
+      status,
+      req.params.id,
+    ])
+
+    if (updateResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Booking not found' })
+    }
+
+    const result = await pool.query(`${BOOKING_SELECT} WHERE b.id = $1`, [req.params.id])
+    const booking = mapBookingRow(result.rows[0])
+
+    getIO().emit('booking:updated', booking)
+
+    res.json(booking)
+  } catch (error) {
+    console.error('Failed to update booking status:', error)
+    res.status(500).json({ error: 'Failed to update booking status' })
   }
 }
