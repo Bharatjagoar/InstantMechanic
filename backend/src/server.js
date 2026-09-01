@@ -1,26 +1,25 @@
-import dns from 'node:dns'
 import express from 'express'
 import cors from 'cors'
+import swaggerUi from 'swagger-ui-express'
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 import 'dotenv/config'
-
-// This machine's ISP-provided DNS resolver intermittently returns only AAAA (IPv6) or
-// only A (IPv4) records for the Neon hostname, causing sporadic ENOTFOUND errors.
-// Point Node's own DNS lookups at reliable public resolvers instead.
-dns.setServers(['1.1.1.1', '8.8.8.8'])
 import adminRoutes from './routes/adminRoutes.js'
 import dashboardRoutes from './routes/dashboardRoutes.js'
 import bookingRoutes from './routes/bookingRoutes.js'
 import mechanicRoutes from './routes/mechanicRoutes.js'
 import customerRoutes from './routes/customerRoutes.js'
 import { setIO } from './realtime/io.js'
+import { swaggerSpec } from './config/swagger.js'
 
 const app = express()
 const PORT = process.env.PORT || 4000
 
 app.use(cors())
 app.use(express.json())
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+app.get('/api-docs.json', (req, res) => res.json(swaggerSpec))
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' })
@@ -44,4 +43,5 @@ setIO(io)
 
 httpServer.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`)
+  console.log(`API docs available at http://localhost:${PORT}/api-docs`)
 })
