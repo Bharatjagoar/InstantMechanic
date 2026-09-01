@@ -1,15 +1,34 @@
-import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, CalendarClock, Wrench, Users, Car, X } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, CalendarClock, Wrench, Users, Car, X, LogOut } from 'lucide-react'
 import { ThemeToggle } from '../ThemeToggle'
+import { useAuth } from '../../context/AuthContext'
 
-const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/bookings', label: 'Bookings', icon: CalendarClock },
-  { to: '/mechanics', label: 'Mechanics', icon: Wrench },
-  { to: '/customers', label: 'Customers', icon: Users },
-]
+const NAV_ITEMS_BY_ROLE = {
+  ops: [
+    { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+    { to: '/bookings', label: 'Bookings', icon: CalendarClock },
+    { to: '/mechanics', label: 'Mechanics', icon: Wrench },
+    { to: '/customers', label: 'Customers', icon: Users },
+  ],
+  customer: [
+    { to: '/my-bookings', label: 'My Bookings', icon: CalendarClock, end: true },
+    { to: '/book', label: 'Book a Service', icon: Wrench },
+  ],
+  mechanic: [{ to: '/my-jobs', label: 'My Jobs', icon: CalendarClock, end: true }],
+}
+
+const ROLE_SUBTITLE = { ops: 'Operations', customer: 'Customer', mechanic: 'Mechanic' }
 
 export function Sidebar({ open, onClose }) {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const navItems = NAV_ITEMS_BY_ROLE[user?.role] ?? []
+
+  function handleLogout() {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <>
       {/* Backdrop — mobile only, closes the drawer on tap outside */}
@@ -36,7 +55,7 @@ export function Sidebar({ open, onClose }) {
                 Instant Mechanic
               </p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Operations
+                {ROLE_SUBTITLE[user?.role] ?? 'Operations'}
               </p>
             </div>
           </div>
@@ -46,7 +65,7 @@ export function Sidebar({ open, onClose }) {
         </div>
 
         <nav className="flex flex-col gap-1 px-3">
-          {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
+          {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
@@ -64,7 +83,26 @@ export function Sidebar({ open, onClose }) {
           ))}
         </nav>
 
-        <div className="mt-auto px-3 pb-5">
+        <div className="mt-auto flex flex-col gap-2 px-3 pb-5">
+          <div className="flex items-center justify-between rounded-lg px-3 py-2">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                {user?.name}
+              </p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {ROLE_SUBTITLE[user?.role]}
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="shrink-0 rounded-lg p-2"
+              style={{ color: 'var(--text-muted)' }}
+              aria-label="Log out"
+              title="Log out"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
           <ThemeToggle />
         </div>
       </aside>

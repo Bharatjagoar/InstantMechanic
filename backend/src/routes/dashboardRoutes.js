@@ -1,5 +1,7 @@
 import { Router } from 'express'
 import { getDashboard } from '../controllers/dashboardController.js'
+import { requireAuth } from '../middleware/requireAuth.js'
+import { requireRole } from '../middleware/requireRole.js'
 
 const router = Router()
 
@@ -8,11 +10,14 @@ const router = Router()
  * /dashboard:
  *   get:
  *     tags: [Dashboard]
- *     summary: Get overview stats and chart data for the ops dashboard
+ *     summary: Get overview stats and chart data for the ops dashboard (ops only)
  *     description: >
  *       Returns the 8 headline stats (total/today's/completed/pending/cancelled bookings,
  *       total revenue, active mechanics, new customers) plus 4 chart datasets
  *       (bookings over time, revenue over time, status breakdown, category breakdown).
+ *       Ops-only — business-wide revenue data.
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Dashboard overview and chart data
@@ -69,6 +74,6 @@ const router = Router()
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-router.get('/', getDashboard)
+router.get('/', requireAuth, requireRole('ops'), getDashboard)
 
 export default router

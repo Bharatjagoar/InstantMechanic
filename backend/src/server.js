@@ -5,10 +5,13 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import 'dotenv/config'
 import adminRoutes from './routes/adminRoutes.js'
+import authRoutes from './routes/authRoutes.js'
 import dashboardRoutes from './routes/dashboardRoutes.js'
 import bookingRoutes from './routes/bookingRoutes.js'
 import mechanicRoutes from './routes/mechanicRoutes.js'
 import customerRoutes from './routes/customerRoutes.js'
+import vehicleRoutes from './routes/vehicleRoutes.js'
+import serviceRoutes from './routes/serviceRoutes.js'
 import { setIO } from './realtime/io.js'
 import { swaggerSpec } from './config/swagger.js'
 
@@ -27,10 +30,13 @@ app.get('/api/health', (req, res) => {
 })
 
 app.use('/api/admin', adminRoutes)
+app.use('/api/auth', authRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/bookings', bookingRoutes)
 app.use('/api/mechanics', mechanicRoutes)
 app.use('/api/customers', customerRoutes)
+app.use('/api/vehicles', vehicleRoutes)
+app.use('/api/services', serviceRoutes)
 
 const httpServer = createServer(app)
 const io = new Server(httpServer, { cors: { origin: '*' } })

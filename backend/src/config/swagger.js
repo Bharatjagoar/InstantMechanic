@@ -11,10 +11,13 @@ const options = {
     },
     servers: [{ url: '/api', description: 'API base path' }],
     tags: [
-      { name: 'Dashboard', description: 'Aggregate stats and chart data' },
-      { name: 'Bookings', description: 'Booking records and status updates' },
-      { name: 'Mechanics', description: 'Mechanic roster and derived workload stats' },
-      { name: 'Customers', description: 'Customer records' },
+      { name: 'Auth', description: 'Login and the logged-in user' },
+      { name: 'Dashboard', description: 'Aggregate stats and chart data (ops only)' },
+      { name: 'Bookings', description: 'Booking records, status updates, and creation' },
+      { name: 'Mechanics', description: 'Mechanic roster and derived workload stats (ops only)' },
+      { name: 'Customers', description: 'Customer records (ops only)' },
+      { name: 'Vehicles', description: "The logged-in customer's own vehicles" },
+      { name: 'Services', description: 'Service catalog' },
       { name: 'Admin', description: 'Database seeding (guarded)' },
     ],
     components: {
@@ -24,8 +27,24 @@ const options = {
           in: 'header',
           name: 'x-seed-key',
         },
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
       },
       schemas: {
+        User: {
+          type: 'object',
+          properties: {
+            id: { type: 'integer', example: 1 },
+            name: { type: 'string', example: 'Ops Admin' },
+            email: { type: 'string', example: 'ops@instantmechanic.demo' },
+            role: { type: 'string', enum: ['customer', 'mechanic', 'ops'] },
+            customerId: { type: 'integer', nullable: true },
+            mechanicId: { type: 'integer', nullable: true },
+          },
+        },
         Customer: {
           type: 'object',
           properties: {
@@ -41,6 +60,7 @@ const options = {
             id: { type: 'integer', example: 1 },
             make: { type: 'string', example: 'Maruti Suzuki' },
             model: { type: 'string', example: 'Swift' },
+            year: { type: 'integer', example: 2019 },
             licensePlate: { type: 'string', example: 'HR17QY5778' },
           },
         },
@@ -50,6 +70,7 @@ const options = {
             id: { type: 'integer', example: 1 },
             name: { type: 'string', example: 'Oil Change' },
             category: { type: 'string', example: 'Maintenance' },
+            basePrice: { type: 'number', example: 733 },
           },
         },
         Mechanic: {

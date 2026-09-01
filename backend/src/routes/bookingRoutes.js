@@ -1,7 +1,17 @@
 import { Router } from 'express'
-import { listBookings, getBookingById, updateBookingStatus } from '../controllers/bookingController.js'
+import {
+  listBookings,
+  getBookingById,
+  updateBookingStatus,
+  createBooking,
+  assignMechanic,
+} from '../controllers/bookingController.js'
+import { requireAuth } from '../middleware/requireAuth.js'
+import { requireRole } from '../middleware/requireRole.js'
 
 const router = Router()
+
+router.use(requireAuth)
 
 /**
  * @openapi
@@ -9,6 +19,12 @@ const router = Router()
  *   get:
  *     tags: [Bookings]
  *     summary: List bookings with search, filter, sort, and pagination
+ *     description: >
+ *       Ops sees every booking. A customer's or mechanic's results are automatically
+ *       scoped to their own bookings/jobs regardless of query params — this same
+ *       endpoint is "my bookings" for a customer and "my jobs" for a mechanic.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -123,5 +139,83 @@ router.get('/:id', getBookingById)
  *             schema: { $ref: '#/components/schemas/Error' }
  */
 router.patch('/:id/status', updateBookingStatus)
+
+/**
+ * @openapi
+ * /bookings:
+ *   post:
+ *     tags: [Bookings]
+ *     summary: Create a booking (customer only)
+ *     description: >
+ *       Creates a booking for the logged-in customer's own vehicle. If a mechanic is
+ *       currently available, one is auto-assigned immediately and the booking is
+ *       created as "assigned"; otherwise it's created as "pending" for ops to assign
+ *       later via PATCH /bookings/{id}/assign. Broadcasts `booking:created` over
+ *       Socket.io.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [vehicleId, serviceId, scheduledAt]
+ *             properties:
+ *               vehicleId: { type: integer }
+ *               serviceId: { type: integer }
+ *               scheduledAt: { type: string, format: date-time }
+ *     responses:
+ *       201:
+ *         description: The created booking
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Booking' }
+ *       403:
+ *         description: The vehicle does not belong to the logged-in customer
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
+router.post('/', requireRole('customer'), createBooking)
+
+/**
+ * @openapi
+ * /bookings/{id}/assign:
+ *   patch:
+ *     tags: [Bookings]
+ *     summary: Manually assign a mechanic to a pending booking (ops only, fallback)
+ *     description: >
+ *       Fallback for bookings stuck at "pending" because no mechanic was available
+ *       at creation time. Broadcasts the update as `booking:updated`.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [mechanicId]
+ *             properties:
+ *               mechanicId: { type: integer }
+ *     responses:
+ *       200:
+ *         description: The updated booking
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Booking' }
+ *       409:
+ *         description: Booking not found or not pending
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
+router.patch('/:id/assign', requireRole('ops'), assignMechanic)
 
 export default router

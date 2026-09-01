@@ -1,5 +1,7 @@
 import { Router } from 'express'
 import { listCustomers } from '../controllers/customerController.js'
+import { requireAuth } from '../middleware/requireAuth.js'
+import { requireRole } from '../middleware/requireRole.js'
 
 const router = Router()
 
@@ -8,7 +10,10 @@ const router = Router()
  * /customers:
  *   get:
  *     tags: [Customers]
- *     summary: List customers with search and pagination
+ *     summary: List customers with search and pagination (ops only)
+ *     description: Ops-only — exposes every customer's contact info.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -40,6 +45,6 @@ const router = Router()
  *                           createdAt: { type: string, format: date-time }
  *                 pagination: { $ref: '#/components/schemas/Pagination' }
  */
-router.get('/', listCustomers)
+router.get('/', requireAuth, requireRole('ops'), listCustomers)
 
 export default router
