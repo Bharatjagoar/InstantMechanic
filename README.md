@@ -192,6 +192,33 @@ pointing at the production API. A `vercel.json` rewrite ensures every client-sid
 **Database** is a managed **Neon** Postgres instance, used by both local development and the
 deployed backend.
 
+## Future Scope
+
+The current design is deliberately sized for its actual load — a single Node process handles
+this comfortably, so no extra infrastructure has been introduced ahead of a real need. The
+natural next additions if traffic grew significantly would be:
+
+- **Socket.io horizontal scaling via Redis Pub/Sub.** If the backend ever ran as multiple
+  instances behind a load balancer, the `@socket.io/redis-adapter` would let every instance
+  publish and receive events through Redis, so a live update handled by one instance still
+  reaches clients connected to another. This is the standard pattern for scaling WebSockets
+  horizontally, and it slots in without changing how events are emitted from the controllers.
+- **Caching the dashboard aggregates.** `GET /api/dashboard` computes several aggregate
+  queries; at higher traffic these would be cached in Redis with a short TTL (a few seconds) —
+  cheap enough to stay effectively real-time while sparing Postgres repeated identical work.
+- **Rate limiting on the auth endpoints**, backed by Redis so request counts are tracked
+  consistently across instances rather than in a single process's memory.
+- **Token revocation** via a Redis denylist of revoked JWTs (TTL matched to token expiry), to
+  support an explicit "log out everywhere" or an immediate response to a compromised account.
+- **Mechanic presence**, tracking which mechanics currently have an active socket connection
+  in Redis, layered on top of the existing `available`/`busy`/`offline` status column for a
+  more precise live picture.
+
+Notably, the one place Redis would *not* be the right tool is the mechanic auto-assignment
+race condition — that's already handled correctly, and more simply, by Postgres's native
+`SELECT ... FOR UPDATE SKIP LOCKED`, the right mechanism for a single-database system, with no
+need for a distributed lock.
+
 ## AI Usage
 
 This project was built hands-on with **Claude Code** (Anthropic) as a coding partner
